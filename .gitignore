@@ -1,0 +1,6 @@
+.DS_Store
+/.build
+/Packages
+/*.xcodeproj
+compile_commands.json
+*.pyc
