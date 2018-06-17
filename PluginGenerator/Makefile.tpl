@@ -46,6 +46,10 @@ build_impl:
 	@swift build -c $(CONFIG) $(SWIFT_OPTS) \
 	  	-Xswiftc "-target"  -Xswiftc "x86_64-apple-macosx10.12" \
 	   	| tee $(LAST_LOG)
+	@clang -g \
+		-Xlinker $(PYTHON_LINKED_LIB) \
+		-Xlinker $(PWD)/.build/$(CONFIG)/lib$(PLUGIN_NAME).dylib \
+		-shared -o .build/$(PLUGIN_NAME).so
 
 .PHONY: test
 test_b: CONFIG=debug
