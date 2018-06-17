@@ -45,7 +45,6 @@ void *swiftvim_call_impl(void *func, void *arg1, void *arg2);
 
 // module=vim, method=command|exec, str = value
 VIM_INTEN void *swiftvim_call(const char *module, const char *method, const char *textArg) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     PyObject *pName = SPyString_FromString(module);
     PyObject *pModule = PyImport_Import(pName);
     Py_DECREF(pName);
@@ -64,12 +63,10 @@ VIM_INTEN void *swiftvim_call(const char *module, const char *method, const char
     void *v = swiftvim_call_impl(pFunc, arg, NULL);
     Py_DECREF(pModule);
     Py_XDECREF(pFunc);
-    PyGILState_Release(gstate);
     return v;
 }
 
 VIM_INTEN void *swiftvim_get_module(const char *module) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     PyObject *pName = SPyString_FromString(module);
     PyObject *pModule = PyImport_Import(pName);
     Py_DECREF(pName);
@@ -78,14 +75,11 @@ VIM_INTEN void *swiftvim_get_module(const char *module) {
         fprintf(plugin_error_f(), "swiftvim error: failed to load \"%s\"\n", module);
         return NULL;
     }
-    PyGILState_Release(gstate);
     return pModule;
 }
 
 VIM_INTEN void *swiftvim_get_attr(void *target, const char *method) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     void *v = PyObject_GetAttrString(target, method);
-    PyGILState_Release(gstate);
     return v;
 }
 
@@ -158,134 +152,99 @@ VIM_INTEN void *swiftvim_eval(const char *eval) {
 
 // TODO: Do these need GIL locks?
 VIM_INTEN void *swiftvim_decref(void *value) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     if (value == NULL) {
-        PyGILState_Release(gstate);
         return NULL;
     }
 
     Py_DECREF(value);
-    PyGILState_Release(gstate);
     return NULL;
 }
 
 VIM_INTEN void *swiftvim_incref(void *value) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     if (value == NULL) {
-        PyGILState_Release(gstate);
         return NULL;
     }
 
     Py_INCREF(value);
-    PyGILState_Release(gstate);
     return NULL;
 }
 
 VIM_INTEN const char *swiftvim_asstring(void *value) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     if (value == NULL) {
-        PyGILState_Release(gstate);
         return "";
     }
     const char *v = SPyString_AsString(value);
-    PyGILState_Release(gstate);
     return v;
 }
 
 VIM_INTEN long swiftvim_asnum(void *value) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     int v = PyLong_AsLong(value);
-    PyGILState_Release(gstate);
     return v;
 }
 
 VIM_INTEN int swiftvim_list_size(void *list) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     int v = PySequence_Size(list);
-    PyGILState_Release(gstate);
     return v;
 }
 
 VIM_INTEN void swiftvim_list_set(void *list, size_t i, void *value) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     PySequence_SetItem(list, i, value);
-    PyGILState_Release(gstate);
 }
 
 VIM_INTEN void *swiftvim_list_get(void *list, size_t i) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     /// Return a borrowed reference
     void *v = PySequence_GetItem(list, i);
-    PyGILState_Release(gstate);
     return v;
 }
 
 VIM_INTEN void swiftvim_list_append(void *list, void *value) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     PyList_Append(list, value);
-    PyGILState_Release(gstate);
 }
 
 // MARK - Dict
 
 VIM_INTEN int swiftvim_dict_size(void *dict) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     int v = PyDict_Size(dict);
-    PyGILState_Release(gstate);
     return v;
 }
 
 VIM_INTEN void *swiftvim_dict_keys(void *dict) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     // Return value: New reference
     void *v = PyDict_Keys(dict);
-    PyGILState_Release(gstate);
     return v;
 }
 
 VIM_INTEN void *swiftvim_dict_values(void *dict) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     // Return value: New reference
     void *v = PyDict_Items(dict);
-    PyGILState_Release(gstate);
     return v;
 }
 
 VIM_INTEN void swiftvim_dict_set(void *dict, void *key, void *value) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     PyDict_SetItem(dict, key, value);
-    PyGILState_Release(gstate);
 }
 
 VIM_INTEN void *swiftvim_dict_get(void *dict, void *key) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     /// Return a borrowed reference
     void *v = PyDict_GetItem(dict, key);
-    PyGILState_Release(gstate);
     return v;
 }
 
 VIM_INTEN void swiftvim_dict_setstr(void *dict, const char *key, void *value) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     PyDict_SetItemString(dict, key, value);
-    PyGILState_Release(gstate);
 }
 
 VIM_INTEN void *swiftvim_dict_getstr(void *dict, const char *key) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     /// Return a borrowed reference
     void *v = PyDict_GetItemString(dict, key);
-    PyGILState_Release(gstate);
     return v;
 }
 
 // MARK - Tuples
 
 VIM_INTEN void *_Nonnull swiftvim_tuple_get(void *_Nonnull tuple, int idx) {
-    PyGILState_STATE gstate = PyGILState_Ensure();
     /// Return a borrowed reference
     void *v = PyTuple_GetItem(tuple, idx);
-    PyGILState_Release(gstate);
     return v;
 }
 
@@ -318,7 +277,6 @@ VIM_INTEN void swiftvim_initialize() {
 VIM_INTEN void swiftvim_finalize() {
     Py_Finalize();
 }
-
 
 VIM_INTEN void *_Nullable swiftvim_get_error() {
     if (PyErr_Occurred()) {
