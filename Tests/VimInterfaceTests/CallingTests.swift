@@ -47,7 +47,7 @@ class VimInterfaceTests: XCTestCase {
                         UnsafeMutablePointer(mutating: moduleCStr),
                         UnsafeMutablePointer(mutating: fCStr),
                         UnsafeMutablePointer(mutating: argCStr))
-                    let value = swiftvim_asint(result)
+                    let value = swiftvim_asnum(result)
                     XCTAssertEqual(value, 1)
                 }
             }
@@ -81,7 +81,7 @@ class VimInterfaceTests: XCTestCase {
                         UnsafeMutablePointer(mutating: moduleCStr),
                         UnsafeMutablePointer(mutating: fCStr),
                         UnsafeMutablePointer(mutating: argCStr))
-                    let value = swiftvim_asint(result)
+                    let value = swiftvim_asnum(result)
                     XCTAssertEqual(value, 1)
                 }
             }

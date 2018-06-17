@@ -13,7 +13,7 @@ public class VimWindow {
         }
         let first = swiftvim_tuple_get(cursor, 0)
         let second = swiftvim_tuple_get(cursor, 1)
-        return (Int(swiftvim_asint(first)), Int(swiftvim_asint(second)))
+        return (Int(swiftvim_asnum(first)), Int(swiftvim_asnum(second)))
     }
 
     public var height: Int {

@@ -9,7 +9,7 @@ extension Int {
             let intValue = Int(strValue) {
             self.init(intValue)
         } else {
-            self.init(swiftvim_asint(value.reference))
+            self.init(swiftvim_asnum(value.reference))
         }
     }
 
@@ -231,7 +231,7 @@ extension UnsafeVimValue {
                 self,
                 UnsafeMutablePointer(mutating: fCStr))
         }
-        return Int(swiftvim_asint(value))
+        return Int(swiftvim_asnum(value))
     }
 }
 

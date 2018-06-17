@@ -9,7 +9,7 @@ void *_Nullable swiftvim_incref(void *_Nullable value);
 
 // Value extraction
 const char *_Nullable swiftvim_asstring(void *_Nullable value);
-int swiftvim_asint(void *_Nullable value);
+long swiftvim_asnum(void *_Nullable value);
 
 // List
 int swiftvim_list_size(void *_Nonnull list);

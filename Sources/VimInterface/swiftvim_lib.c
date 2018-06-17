@@ -192,7 +192,7 @@ VIM_INTEN const char *swiftvim_asstring(void *value) {
     return v;
 }
 
-VIM_INTEN int swiftvim_asint(void *value) {
+VIM_INTEN long swiftvim_asnum(void *value) {
     PyGILState_STATE gstate = PyGILState_Ensure();
     int v = PyLong_AsLong(value);
     PyGILState_Release(gstate);
