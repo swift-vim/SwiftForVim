@@ -12,6 +12,13 @@ extension Int {
             self.init(swiftvim_asint(value.reference))
         }
     }
+
+    init?(_ value: VimValue?) {
+        guard let value = value else {
+            return nil
+        }
+        self.init(value)
+    }
 }
 
 extension String {
@@ -20,6 +27,26 @@ extension String {
             return nil
         }
         self.init(cString: cStr)
+    }
+
+    init?(_ value: VimValue?) {
+        guard let value = value else {
+            return nil
+        }
+        self.init(value)
+    }
+}
+
+extension Bool {
+    init?(_ value: VimValue) {
+        self.init((Int(value) ?? 0) != 0)
+    }
+
+    init?(_ value: VimValue?) {
+        guard let value = value else {
+            return nil
+        }
+        self.init(value)
     }
 }
 
@@ -66,6 +93,10 @@ extension VimValue {
         return Int(self)
     }
 
+    public func asBool() -> Bool? {
+        return Bool(self)
+    }
+
     public func asList() -> VimList? {
         return VimList(self)
     }
@@ -79,7 +110,7 @@ extension VimValue {
 public final class VimDictionary {
     private let value: VimValue
 
-    fileprivate init(_ value: VimValue) {
+    init?(_ value: VimValue) {
         self.value = value
     }
 
@@ -135,8 +166,7 @@ public final class VimDictionary {
 public final class VimList: Collection {
     private let value: VimValue
 
-    /// Cast a VimValue to a VimList
-    public init(_ value: VimValue) {
+    public init?(_ value: VimValue) {
         self.value = value
     }
 

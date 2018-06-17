@@ -16,6 +16,6 @@ public class VimBuffer {
     }()
 
     public func asList() -> VimList {
-        return VimList(self.value)
+        return VimList(self.value)!
     }
 }

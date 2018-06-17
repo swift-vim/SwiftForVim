@@ -31,12 +31,12 @@ Vimscript <-> Swift
 
 Calling Vim commands
 ```
-Vim.command("echo hi")
+Vim.command("echo 'Hello World!'")
 ```
 
 Evaluating Vim expressions
 ```
-let path = Vim.eval("expand('%:p')").asString() 
+let path = String(Vim.eval("expand('%:p')"))
 ```
 
 ### VimKit
@@ -63,7 +63,7 @@ Threading and Async support for Vim
 DispatchQueue.async {
     // Do some work
     VimTask.onMain {
-        Vim.command("echo 'Hi on the main thread.'")
+        Vim.command("echo 'Hello World! on the main thread.'")
     }
 }
 ```

@@ -41,11 +41,15 @@ extension Vim {
     }
 
     public static func get(_ variable: String) -> Bool {
-        return Bool((eval(variable)?.asInt() ?? 0) != 0)
+        return eval(variable)?.asBool() ?? false
     }
 
     public static func get(_ variable: String) -> Int {
         return eval(variable)?.asInt() ?? 0
+    }
+
+    public static func get(_ variable: String) -> String {
+        return eval(variable)?.asString() ?? ""
     }
 
     /// Returns the 0-based current line and 0-based current column
