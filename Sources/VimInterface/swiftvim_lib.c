@@ -319,3 +319,17 @@ VIM_INTEN void swiftvim_finalize() {
     Py_Finalize();
 }
 
+
+VIM_INTEN void *_Nullable swiftvim_get_error() {
+    if (PyErr_Occurred()) {
+        PyObject *type, *value, *traceback;
+        PyErr_Fetch(&type, &value, &traceback);
+        if (value) {
+            return value;
+        } else {
+            return type;
+        }
+    }
+    return NULL;
+}
+

@@ -29,27 +29,27 @@ extension Vim {
     }
 
     public static func set(variable: String, value: VimScriptConvertible) {
-        command("let \(variable) = \(value.toVimScript())")
+        _ = try? command("let \(variable) = \(value.toVimScript())")
     }
 
     public static func get(variable: String) -> VimValue? {
-        return eval(variable)
+        return try? eval(variable)
     }
 
     public static func get(_ variable: String) -> VimValue? {
-        return eval(variable)
+        return try? eval(variable)
     }
 
     public static func get(_ variable: String) -> Bool {
-        return eval(variable)?.asBool() ?? false
+        return (try? eval(variable))?.asBool() ?? false
     }
 
     public static func get(_ variable: String) -> Int {
-        return eval(variable)?.asInt() ?? 0
+        return (try? eval(variable))?.asInt() ?? 0
     }
 
     public static func get(_ variable: String) -> String {
-        return eval(variable)?.asString() ?? ""
+        return (try? eval(variable))?.asString() ?? ""
     }
 
     /// Returns the 0-based current line and 0-based current column

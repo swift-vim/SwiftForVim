@@ -47,3 +47,6 @@ void *_Nullable swiftvim_call_impl(void *_Nonnull func, void *_Nullable arg1, vo
 void swiftvim_initialize();
 void swiftvim_finalize();
 
+void *_Nullable swiftvim_get_error();
+
+
