@@ -32,20 +32,20 @@ extension Vim {
         command("let \(variable) = \(value.toVimScript())")
     }
 
-    public static func get(variable: String) -> VimValue {
+    public static func get(variable: String) -> VimValue? {
         return eval(variable)
     }
 
-    public static func get(_ variable: String) -> VimValue {
+    public static func get(_ variable: String) -> VimValue? {
         return eval(variable)
     }
 
     public static func get(_ variable: String) -> Bool {
-        return Bool((eval(variable).asInt() ?? 0) != 0)
+        return Bool((eval(variable)?.asInt() ?? 0) != 0)
     }
 
     public static func get(_ variable: String) -> Int {
-        return eval(variable).asInt() ?? 0
+        return eval(variable)?.asInt() ?? 0
     }
 
     /// Returns the 0-based current line and 0-based current column

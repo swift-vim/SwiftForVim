@@ -36,14 +36,14 @@ class VimValueTests: XCTestCase {
 
     func testEvalString() {
         swiftvim_initialize()
-        let result = Vim.eval("VALUE")
+        let result = Vim.eval("VALUE")!
         XCTAssertEqual(result.asString(), "VALUE")
         swiftvim_finalize()
     }
 
     func testCommandNone() {
         swiftvim_initialize()
-        let result = Vim.command("VALUE")
+        let result = Vim.command("VALUE")!
         XCTAssertNil(result.asString())
         swiftvim_finalize()
     }
@@ -51,7 +51,7 @@ class VimValueTests: XCTestCase {
     func testEvalInt() {
         swiftvim_initialize()
         mutateRuntime("eval", lambda: "lambda value : int(value)")
-        let result = Vim.eval("2")
+        let result = Vim.eval("2")!
         XCTAssertEqual(result.asInt(), 2)
         swiftvim_finalize()
     }
@@ -59,7 +59,7 @@ class VimValueTests: XCTestCase {
     func testEvalList() {
         swiftvim_initialize()
         mutateRuntime("eval", lambda: "lambda value : [1, 2]")
-        let result = Vim.eval("")
+        let result = Vim.eval("")!
         var list = result.asList()!
         XCTAssertEqual(list.count, 2)
         XCTAssertEqual(list[0].asInt(), 1)
@@ -72,7 +72,7 @@ class VimValueTests: XCTestCase {
     func testListCollectionUsage() {
         swiftvim_initialize()
         mutateRuntime("eval", lambda: "lambda value : [1, 2]")
-        let result = Vim.eval("")
+        let result = Vim.eval("")!
         let list = result.asList()!
         /// Smoke test we can do collectiony things.
         let incremented = list.map { $0.asInt()! + 1 }
@@ -83,7 +83,7 @@ class VimValueTests: XCTestCase {
     func testEvalDict() {
         swiftvim_initialize()
         mutateRuntime("eval", lambda: "lambda value : dict(a=42, b='a')")
-        let result = Vim.eval("")
+        let result = Vim.eval("")!
         var dict = result.asDictionary()!
         let aVal = dict["a"]!
         XCTAssertEqual(aVal.asInt()!, 42)
@@ -96,7 +96,7 @@ class VimValueTests: XCTestCase {
     func testDictCollectionUsage() {
         swiftvim_initialize()
         mutateRuntime("eval", lambda: "lambda value : dict(a=42, b='a')")
-        let result = Vim.eval("")
+        let result = Vim.eval("")!
         let dict = result.asDictionary()!
         XCTAssertEqual(dict.keys.count, 2)
         XCTAssertEqual(dict.values.count, 2)

@@ -63,8 +63,8 @@ VIM_INTEN void *swiftvim_call(const char *module, const char *method, const char
     PyObject *pFunc = PyObject_GetAttrString(pModule, method);
     void *v = swiftvim_call_impl(pFunc, arg, NULL);
     Py_DECREF(pModule);
-    PyGILState_Release(gstate);
     Py_XDECREF(pFunc);
+    PyGILState_Release(gstate);
     return v;
 }
 

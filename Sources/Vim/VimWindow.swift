@@ -1,14 +1,14 @@
 import VimInterface
 
 public class VimWindow {
-    private let value: UnsafeVimValue
+    private let value: VimValue
 
-    init(value: UnsafeVimValue) {
+    init(_ value: VimValue) {
         self.value = value
     }
 
     public var cursor: (Int, Int) {
-        guard let cursor = self.value.attrp("cursor") else {
+        guard let cursor = self.value.reference.attrp("cursor") else {
             return (0, 0)
         }
         let first = swiftvim_tuple_get(cursor, 0)
@@ -17,23 +17,23 @@ public class VimWindow {
     }
 
     public var height: Int {
-        return value.attr("height")
+        return value.reference.attr("height")
     }
 
     public var col: Int {
-        return value.attr("col")
+        return value.reference.attr("col")
     }
 
     public var row: Int {
-        return value.attr("row")
+        return value.reference.attr("row")
     }
 
     public var valid: Bool {
-        return value.attr("valid") != 0
+        return value.reference.attr("valid") != 0
     }
 
     public var buffer: VimBuffer {
-        return VimBuffer(value: value.attrp("buffer")!)
+        return VimBuffer(VimValue(reference: value.reference.attrp("buffer")!))
     }
 }
 

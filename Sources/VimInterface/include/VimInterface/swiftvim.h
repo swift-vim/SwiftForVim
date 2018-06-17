@@ -40,7 +40,7 @@ void *_Nullable swiftvim_call(const char *_Nonnull module, const char *_Nonnull 
 void *_Nullable swiftvim_get_module(const char *_Nonnull module);
 void *_Nullable swiftvim_get_attr(void *_Nonnull target, const char *_Nonnull attr);
 
-void *_Nullable swiftvim_call_impl(void *func, void *_Nullable arg1, void *_Nullable arg2);
+void *_Nullable swiftvim_call_impl(void *_Nonnull func, void *_Nullable arg1, void *_Nullable arg2);
 
 // Bootstrapping
 // Note: These methods are only for testing purposes

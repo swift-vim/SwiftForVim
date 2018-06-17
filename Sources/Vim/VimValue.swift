@@ -1,80 +1,101 @@
 import VimInterface
 
+
+extension Int {
+    init?(_ value: VimValue) {
+        // Generally, eval results are returned as strings
+        // Perhaps there is a better way to express this.
+        if let strValue = value.asString(), 
+            let intValue = Int(strValue) {
+            self.init(intValue)
+        } else {
+            self.init(swiftvim_asint(value.reference))
+        }
+    }
+}
+
+extension String {
+    init?(_ value: VimValue) {
+        guard let cStr = swiftvim_asstring(value.reference) else {
+            return nil
+        }
+        self.init(cString: cStr)
+    }
+}
+
 /// Vim Value represents a value in Vim
 ///
 /// This value is generally created from vimscript function calls. It provides
 /// a "readonly" view of Vim's state.
 public final class VimValue {
-    fileprivate let value: UnsafeVimValue?
+    let reference: UnsafeVimValue
     private let doDeInit: Bool
 
-    init(value: UnsafeVimValue?, doDeInit: Bool = false) {
-        self.value = value
+    init(_ value: UnsafeVimValue, doDeInit: Bool = false) {
+        self.reference = value
         self.doDeInit = doDeInit
+    }
+
+    /// Borrowed reference
+    init(borrowedReference: UnsafeVimValue) {
+        self.reference = borrowedReference
+        self.doDeInit = false
+    }
+
+    init(reference: UnsafeVimValue) {
+        // FIXME: Audit spmvim_lib.c for cases of this
+        self.reference = reference
+        self.doDeInit = true
     }
 
     deinit {
         /// Correctly decrement when this value is done.
         if doDeInit {
-            swiftvim_decref(value)
+            swiftvim_decref(reference)
         }
     }
+}
 
-    // Mark - Casting
-
+/// Casting extensions
+extension VimValue {
     public func asString() -> String? {
-        guard let value = self.value else { return nil }
-        guard let cStr = swiftvim_asstring(value) else {
-            return nil
-        }
-        return String(cString: cStr)
+        return String(self)
     }
 
     public func asInt() -> Int? {
-        // Generally, eval results are returned as strings
-        // Perhaps there is a better way to express this.
-        if let strValue = asString(), 
-            let value = Int(strValue) {
-            return value  
-        }
-        guard let value = self.value else { return nil }
-        return Int(swiftvim_asint(value))
+        return Int(self)
     }
 
     public func asList() -> VimList? {
-        guard let value = self.value else { return nil }
-        return VimList(value: value)
+        return VimList(self)
     }
 
     public func asDictionary() -> VimDictionary? {
-        guard let value = self.value else { return nil }
-        return VimDictionary(value: value)
+        return VimDictionary(self)
     }
 }
 
 // A Dictionary
 public final class VimDictionary {
-    private let value: UnsafeVimValue
+    private let value: VimValue
 
-    fileprivate init(value: UnsafeVimValue) {
+    fileprivate init(_ value: VimValue) {
         self.value = value
     }
 
     public var count: Int {
-        return Int(swiftvim_dict_size(value))
+        return Int(swiftvim_dict_size(value.reference))
     }
 
     public var keys: VimList {
-        guard let list = VimValue(value: swiftvim_dict_keys(value),
-                  doDeInit: false).asList() else {
+        guard let list = VimValue(reference: swiftvim_dict_keys(value.reference)).asList() else {
             fatalError("Can't get keys")
          }
          return list
     }
 
     public var values: VimList {
-        guard let list =  VimValue(value: swiftvim_dict_values(value),
-                  doDeInit: false).asList() else {
+        guard let list = VimValue(reference: swiftvim_dict_values(value.reference)).asList() else {
             fatalError("Can't get values")
         }
         return list
@@ -82,28 +103,28 @@ public final class VimDictionary {
 
     public subscript(index: VimValue) -> VimValue? {
         get {
-            guard let v = swiftvim_dict_get(value, index.value) else {
+            guard let v = swiftvim_dict_get(value.reference, index.reference) else {
                 return nil
             }
-            return VimValue(value: v)
+            return VimValue(v)
         }
         set {
-            swiftvim_dict_set(value, index.value!, newValue?.value)
+            swiftvim_dict_set(value.reference, index.reference, newValue?.reference)
         }
     }
 
     public subscript(index: String) -> VimValue? {
         get {
             return index.withCString { cStrIdx in
-                guard let v = swiftvim_dict_getstr(value, cStrIdx) else {
+                guard let v = swiftvim_dict_getstr(value.reference, cStrIdx) else {
                     return nil
                 }
-                return VimValue(value: v)
+                return VimValue(v)
             }
         }
         set {
             index.withCString { cStrIdx in
-                swiftvim_dict_setstr(value, cStrIdx, newValue?.value)
+                swiftvim_dict_setstr(value.reference, cStrIdx, newValue?.reference)
             }
         }
     }
@@ -112,14 +133,10 @@ public final class VimDictionary {
 
 /// A List of VimValues
 public final class VimList: Collection {
-    private let value: UnsafeVimValue
+    private let value: VimValue
 
     /// Cast a VimValue to a VimList
-    public init(_ vimValue: VimValue) {
-        self.value = vimValue.value!
-    }
-
-    init(value: UnsafeVimValue) {
+    public init(_ value: VimValue) {
         self.value = value
     }
 
@@ -128,23 +145,23 @@ public final class VimList: Collection {
     }
 
     public var endIndex: Int {
-        return Int(swiftvim_list_size(value))
+        return Int(swiftvim_list_size(value.reference))
     }
 
     public var isEmpty: Bool {
-        return swiftvim_list_size(value) == 0 
+        return swiftvim_list_size(value.reference) == 0 
     }
 
     public var count: Int {
-        return Int(swiftvim_list_size(value))
+        return Int(swiftvim_list_size(value.reference))
     }
 
     public subscript(index: Int) -> VimValue {
         get {
-            return VimValue(value: swiftvim_list_get(value, Int32(index)))
+            return VimValue(swiftvim_list_get(value.reference, Int32(index)))
         }
         set {
-            swiftvim_list_set(value, Int32(index), newValue.value)
+            swiftvim_list_set(value.reference, Int32(index), newValue.reference)
         }
     }
 
