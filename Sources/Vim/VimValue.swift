@@ -1,8 +1,7 @@
 import VimInterface
 
-
 extension Int {
-    init?(_ value: VimValue) {
+    public init?(_ value: VimValue) {
         // Generally, eval results are returned as strings
         // Perhaps there is a better way to express this.
         if let strValue = value.asString(), 
@@ -13,7 +12,7 @@ extension Int {
         }
     }
 
-    init?(_ value: VimValue?) {
+    public init?(_ value: VimValue?) {
         guard let value = value else {
             return nil
         }
@@ -22,14 +21,14 @@ extension Int {
 }
 
 extension String {
-    init?(_ value: VimValue) {
+    public init?(_ value: VimValue) {
         guard let cStr = swiftvim_asstring(value.reference) else {
             return nil
         }
         self.init(cString: cStr)
     }
 
-    init?(_ value: VimValue?) {
+    public init?(_ value: VimValue?) {
         guard let value = value else {
             return nil
         }
@@ -69,7 +68,7 @@ public final class VimValue {
         self.doDeInit = false
     }
 
-    init(reference: UnsafeVimValue) {
+    public init(reference: UnsafeVimValue) {
         // FIXME: Audit spmvim_lib.c for cases of this
         self.reference = reference
         self.doDeInit = true
@@ -204,7 +203,7 @@ public final class VimList: Collection {
 // MARK - Internal
 
 /// This is a helper for internal usage
-typealias UnsafeVimValue = UnsafeMutableRawPointer
+public typealias UnsafeVimValue = UnsafeMutableRawPointer
 
 extension UnsafeVimValue {
     func attrp(_ key: String) -> UnsafeVimValue? {

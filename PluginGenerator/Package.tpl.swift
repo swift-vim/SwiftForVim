@@ -6,26 +6,33 @@ import PackageDescription
 let package = Package(
     name: "__VIM_PLUGIN_NAME__",
     products: [
-        // Products define the executables and libraries produced by a package, and make them visible to other packages.
         .library(
             name: "__VIM_PLUGIN_NAME__",
+            type: .dynamic,
             targets: ["__VIM_PLUGIN_NAME__"]),
     ],
     dependencies: [
-        // Dependencies declare other packages that this package depends on.
-        // SwiftForVim is moving fast, 
-        // master for the latest and greatest
         .package(url: "https://github.com/swift-vim/SwiftForVim.git",
              .revision("__GIT_REVISION__"))
     ],
     targets: [
-        // Targets are the basic building blocks of a package. A target can define a module or a test suite.
-        // Targets can depend on other targets in this package, and on products in packages which this package depends on.
+        // Currently, it uses SPM, in a somewhat unconventional way due to
+        // namespacing: It isn't possible to build Vim plugins with SPM
+        // naievely.
+        //
+        // Consider SPM an implementation detail of the Makefile. See the
+        // Makefile for more info.
         .target(
             name: "__VIM_PLUGIN_NAME__",
-            dependencies: ["VimKit", "VimAsync"]),
+            // The dependencies of the target __VIM_PLUGIN_NAME__
+            // are added in the Maekfile. Don't add here.
+            dependencies: []),
         .testTarget(
             name: "__VIM_PLUGIN_NAME__Tests",
             dependencies: ["__VIM_PLUGIN_NAME__"]),
+        // We cant depend on "Vim" due to namespacing issues
+        // and SPM. This makes "Vim" available as a target.
+        .testTarget(name: "StubSPMVimImport",
+            dependencies: ["Vim"])
     ]
 )

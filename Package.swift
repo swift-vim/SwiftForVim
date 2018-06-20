@@ -6,16 +6,20 @@ import PackageDescription
 let package = Package(
     name: "Vim",
     products: [
-        // VimKit is a Library for VimPlugin development
-        .library(
-            name: "VimKit",
-            type: .static,
-            targets: ["VimKit"]),
-
         .library(
             name: "VimInterface",
             type: .static,
             targets: ["VimInterface"]),
+
+        .library(
+            name: "Vim",
+            type: .static,
+            targets: ["Vim"]),
+
+        .library(
+            name: "VimPluginBootstrap",
+            type: .static,
+            targets: ["VimPluginBootstrap"]),
 
         .library(
             name: "VimAsync",
@@ -29,29 +33,30 @@ let package = Package(
     ],
 
     targets: [
-        .target(name: "VimKit",
-            dependencies: ["Vim"]),
         .target(name: "Vim",
-            dependencies: ["VimInterface"]),
+            dependencies: ["VimInterface", "VimPluginBootstrap"]),
 
         .target(name: "VimInterface",
+            dependencies: []),
+
+        .target(name: "VimPluginBootstrap",
             dependencies: []),
 
         // Async Support for Vim. Note, that this is OSX only and
         // depends on Foundation
         .target(name: "VimAsync",
-            dependencies: ["VimKit"]),
+            dependencies: []),
 
         // Tests
         .testTarget(
             name: "VimInterfaceTests",
-            dependencies: ["VimInterface", "Example"]),
+            dependencies: ["VimInterface"]),
         .testTarget(
-            name: "VimKitTests",
-            dependencies: ["VimKit", "Example"]),
+            name: "VimTests",
+            dependencies: []),
 
-        // Example
+        // Example:
         .target(name: "Example",
-            dependencies: ["VimKit", "VimAsync"]),
+            dependencies: []),
     ]
 )

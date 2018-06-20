@@ -33,6 +33,7 @@ int swiftvim_dict_size(void *_Nonnull dict);
 
 // Tuples
 void *_Nullable swiftvim_tuple_get(void *_Nonnull tuple, int idx);
+int swiftvim_tuple_size(void *_Nonnull tuple);
 
 
 void *_Nullable swiftvim_call(const char *_Nonnull module, const char *_Nonnull method, const char *_Nullable str); 
@@ -48,5 +49,4 @@ void swiftvim_initialize();
 void swiftvim_finalize();
 
 void *_Nullable swiftvim_get_error();
-
 

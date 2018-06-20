@@ -1,9 +1,6 @@
 import XCTest
-import VimKit
 import VimInterface
-import Vim
-
-@testable import VimKit
+import ExampleVim
 
 /// Here we mutate the runtime to do things we want
 /// Note, that this relies on the fact it uses python internally
@@ -116,6 +113,26 @@ class VimValueTests: XCTestCase {
         let window = Vim.current.window
         XCTAssertEqual(window.cursor.0, 1)
         XCTAssertEqual(window.cursor.1, 2)
+        swiftvim_finalize()
+    }
+
+    func testCallback() {
+        var called = false
+        func callback(args: Any) -> Any? {
+            called = true
+            print("DidCallback")
+            return nil
+        }
+
+        swiftvim_initialize()
+        let erasedFunc = callback as AnyObject
+        let address = unsafeBitCast(erasedFunc, to: Int.self)
+        VimPlugin.setCallable(String(address), callable: callback)
+        let cb = "Example.invoke('\(address)', 'arga')"
+        print("Callback:", cb)
+        mutateRuntime("eval", lambda: "lambda value : \(cb)")
+        try? Vim.eval("")
+        XCTAssertTrue(called)
         swiftvim_finalize()
     }
 }

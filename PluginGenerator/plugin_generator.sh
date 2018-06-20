@@ -22,7 +22,7 @@ swift package init
 
 mkdir -p plugin
 sed "s,__VIM_PLUGIN_NAME__,$PLUGIN,g" $SCRIPTPATH/plugin.tpl.vim \
-    > plugin/$PLUGIN
+    > plugin/$PLUGIN.vim
 sed "s,__VIM_PLUGIN_NAME__,$PLUGIN,g" $SCRIPTPATH/PluginMain.tpl.swift \
     > Sources/$PLUGIN/$PLUGIN.swift
 
@@ -31,7 +31,7 @@ sed "s,__VIM_PLUGIN_NAME__,$PLUGIN,g" $SCRIPTPATH/Package.tpl.swift \
 sed -i "" "s,__GIT_REVISION__,$REV,g"  Package.swift
 
 mkdir -p VimUtils
-ditto $SCRIPTPATH/../Utils/make_lib.sh VimUtils/
+ditto $SCRIPTPATH/../VimUtils/make_lib.sh VimUtils/
 
 sed "s,__VIM_PLUGIN_NAME__,$PLUGIN,g" $SCRIPTPATH/Makefile.tpl \
     > Makefile

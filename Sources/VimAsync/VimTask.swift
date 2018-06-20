@@ -1,4 +1,3 @@
-import VimKit
 import Foundation
 
 private var rlLock = os_unfair_lock_s()
@@ -108,19 +107,19 @@ public final class VimTask<T> : NSObject {
             self.running = false
         }
     }
+
+}
+
+/// Callback for the main run loop
+public func VimTaskRunLoopCallback() {
+    VimRunLoop.main.runOnce()
 }
 
 /// Check in code if thread is on the main
-public func ensureMain() {
+public func VimTaskMainThreadGuard() {
     guard Thread.current == Thread.main else {
         fatalError("error: main thread check failed")
     }
 }
 
-/// Vimkit Runloop extension
-extension VimKit {
-    public static func runLoopCallback() {
-        VimRunLoop.main.runOnce()
-    }
-}
 

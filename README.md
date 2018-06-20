@@ -23,36 +23,30 @@ Last, setup the plugin like any other vim plugin ( i.e. with Pathogen ).
 
 ## Vim API
 
-SwiftForVim is made up of 3 small modules.
-
 ### Vim
 
 Vimscript <-> Swift
 
-Calling Vim commands
+Calling Vim commands from Swift
 ```
 Vim.command("echo 'Hello World!'")
 ```
 
-Evaluating Vim expressions
+Evaluating Vim expressions from Swift
 ```
 let path = String(Vim.eval("expand('%:p')"))
 ```
 
-### VimKit
-
-Implement plugins and handle callbacks from Vim
+Call Swift functions from Vim
 
 ```
-class ExamplePlugin: VimPlugin {
-    func event(event id: Int, context: String) -> String? {
-        print("Autocmd")
-        return nil 
-    }
+VimPlugin.setCallable("cursorMoved") {
+    _ in
+    print("The cursor moved")
 }
 
 // Off in VimScript
-autocmd CursorMoved * call s:SwiftVimEval("example.event(0, 'Moved')")
+call s:SwiftVimEval("MyAwesomePlugin.invoke('cursorMoved')")
 ```
 
 ### VimAsync
@@ -68,7 +62,7 @@ DispatchQueue.async {
 }
 ```
 
-_Note: this is macOS only right now. Its not needed for basic, single threaded plugins._
+_Note: VimAsync depends on Foundation. Its not needed for basic, single threaded plugins._
 
 ## Design Goals
 
