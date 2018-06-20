@@ -22,13 +22,20 @@ BASE_OPTS=-Xcc -I$(PYTHON_INCLUDE) \
 	-Xlinker -undefined -Xlinker dynamic_lookup \
 	-Xlinker -all_load
 
+
+
+# Build namespaced versions of Vim and VimAsync libs.
+# The modules have a prefix of the plugin name, to avoid conflicts
+# when the code is linked into the Vim process.
+# The module is imported as "import $(PLUGIN_NAME)Vim"
+# FIXME: Consider other ways to do this that work transitively and
+# doesn't trigger rebuilds
+
 .PHONY: vim_lib, renamed_vim_lib
 vim_lib: SWIFT_OPTS=--product Vim  \
 	-Xswiftc -module-name=$(PLUGIN_NAME)Vim \
 	-Xswiftc -module-link-name=$(PLUGIN_NAME)Vim \
 	$(BASE_OPTS) 
-
-# FIXME: this triggers rebuilds.
 renamed_vim_lib: vim_lib
 	@ditto $(BUILD_DIR)/Vim.swiftmodule \
 		$(BUILD_DIR)/$(PLUGIN_NAME)Vim.swiftmodule
@@ -37,7 +44,6 @@ renamed_vim_lib: vim_lib
 	@ditto $(BUILD_DIR)/libVim.a \
 		$(BUILD_DIR)/lib$(PLUGIN_NAME)Vim.a
 
-# FIXME: this triggers rebuilds.
 .PHONY: vim_async_lib, renamed_vim_lib_async
 vim_async_lib: SWIFT_OPTS=--product VimAsync  \
 	-Xswiftc -module-name=$(PLUGIN_NAME)VimAsync \
@@ -49,7 +55,7 @@ renamed_vim_async_lib: vim_async_lib
 	ditto $(BUILD_DIR)/VimAsync.swiftdoc \
 		$(BUILD_DIR)/$(PLUGIN_NAME)VimAsync.swiftdoc
 	@ditto $(BUILD_DIR)/libVimAsync.a \
-		$(BUILD_DIR)/lib$(PLUGIN_NAME)libVimAsync.a
+		$(BUILD_DIR)/lib$(PLUGIN_NAME)VimAsync.a
 
 # Main plugin lib
 .PHONY: plugin_lib
