@@ -17,29 +17,29 @@
 // Mantra:
 // The symbols exported are the ones necessary.
 // Any exported symbols *MUST* be namespaced.
-#define VIM_EXTERN __attribute__ ((visibility("default")))
+#define VIM_EXTERN extern __attribute__((visibility("default")))
 
 
-// Plugin init is called to bootstrap the plugin in vim
+// Plugin load is called to bootstrap the plugin in vim
 // These methods are defined within the user provided library
 // The VimInteface doesn't actually define these.
-extern int PLUGIN_FUNC(VIM_PLUGIN_NAME, _plugin_init)(const char *);
-extern const char *PLUGIN_FUNC(VIM_PLUGIN_NAME, _plugin_event)(int, const char *);
-extern const char *PLUGIN_FUNC(VIM_PLUGIN_NAME, _plugin_runloop_callback)(void);
+extern int PLUGIN_FUNC(VIM_PLUGIN_NAME, _plugin_load)(const char *)  __attribute__((weak));
+extern const char *PLUGIN_FUNC(VIM_PLUGIN_NAME, _plugin_runloop_callback)(void)  __attribute__((weak));
+extern const char *PLUGIN_FUNC(VIM_PLUGIN_NAME, _plugin_invoke)(void*)  __attribute__((weak));
 
 static PyObject *swiftvimError;
 
 // Python methods
 static PyObject *PLUGIN_FUNC(VIM_PLUGIN_NAME, _load)(PyObject *self, PyObject *args);
-static PyObject *PLUGIN_FUNC(VIM_PLUGIN_NAME, _event)(PyObject *self, PyObject *args);
+static PyObject *PLUGIN_FUNC(VIM_PLUGIN_NAME, _invoke)(PyObject *self, PyObject *args);
 static PyObject *PLUGIN_FUNC(VIM_PLUGIN_NAME, _runloop_callback)(PyObject *self, PyObject *args);
 
 static PyMethodDef swiftvimMethods[] = {
     {"load",  PLUGIN_FUNC(VIM_PLUGIN_NAME, _load), METH_VARARGS,
      "Load the plugin."},
 
-    {"event",  PLUGIN_FUNC(VIM_PLUGIN_NAME, _event), METH_VARARGS,
-     "Handle a user event."},
+    {"invoke",  PLUGIN_FUNC(VIM_PLUGIN_NAME, _invoke), METH_VARARGS,
+     "Invoke a user callback"},
 
     {"runloop_callback",  PLUGIN_FUNC(VIM_PLUGIN_NAME, _runloop_callback), METH_VARARGS,
      "RunLoop callback"},
@@ -58,6 +58,7 @@ static struct PyModuleDef swiftvimmodule = {
     swiftvimMethods
 };
 
+VIM_EXTERN PyMODINIT_FUNC PLUGIN_FUNC(PyInit_, VIM_PLUGIN_NAME)(void);
 VIM_EXTERN PyMODINIT_FUNC PLUGIN_FUNC(PyInit_, VIM_PLUGIN_NAME)(void) {
     PyObject *m;
 
@@ -86,6 +87,12 @@ VIM_EXTERN PyMODINIT_FUNC PLUGIN_FUNC(init, VIM_PLUGIN_NAME)(void) {
 }
 #endif
 
+__attribute__((constructor)) void _T(void) {
+    if (PLUGIN_FUNC(init, VIM_PLUGIN_NAME) == NULL) {
+        fprintf(stderr, "error: can't find plugin..");
+    }
+}
+
 // Mark - Method Implementations
 
 static int calledPluginInit = 0;
@@ -94,10 +101,10 @@ static PyObject *PLUGIN_FUNC(VIM_PLUGIN_NAME, _load)(PyObject *self, PyObject *a
 {
     int status = 1;
     if (calledPluginInit == 0) {
-        status = PLUGIN_FUNC(VIM_PLUGIN_NAME, _plugin_init)("init");
+        status = PLUGIN_FUNC(VIM_PLUGIN_NAME, _plugin_load)("load");
         calledPluginInit = 1;
     } else {
-        fprintf(stderr, "warning: called swiftvim.plugin_init more than once");
+        fprintf(stderr, "warning: called swiftvim.plugin_load more than once");
     }
     return Py_BuildValue("i", status);
 }
@@ -108,18 +115,10 @@ static PyObject *PLUGIN_FUNC(VIM_PLUGIN_NAME, _runloop_callback)(PyObject *self,
     return Py_BuildValue("i", 0);
 }
 
-static PyObject *PLUGIN_FUNC(VIM_PLUGIN_NAME, _event)(PyObject *self, PyObject *args)
+static PyObject *PLUGIN_FUNC(VIM_PLUGIN_NAME, _invoke)(PyObject *self, PyObject *args)
 {
-    const char *ctx;
-    int event;
-    void *result;
-    if (!PyArg_ParseTuple(args, "is", &event, &ctx)) {
-        fprintf(stderr, "plugin_event parsefail");
-        result = (void *)PLUGIN_FUNC(VIM_PLUGIN_NAME, _plugin_event)(-1, "error parse");
-    } else {
-        result = (void *)PLUGIN_FUNC(VIM_PLUGIN_NAME, _plugin_event)(event, ctx);
-    }
-
+    void *result = (void *)PLUGIN_FUNC(VIM_PLUGIN_NAME, _plugin_invoke)(args);
     return Py_BuildValue("s", result);
 }
+
 

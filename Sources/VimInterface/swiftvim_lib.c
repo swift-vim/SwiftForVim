@@ -178,7 +178,7 @@ VIM_INTEN const char *swiftvim_asstring(void *value) {
 }
 
 VIM_INTEN long swiftvim_asnum(void *value) {
-    int v = PyLong_AsLong(value);
+    long v = PyLong_AsLong(value);
     return v;
 }
 
@@ -245,6 +245,15 @@ VIM_INTEN void *swiftvim_dict_getstr(void *dict, const char *key) {
 VIM_INTEN void *_Nonnull swiftvim_tuple_get(void *_Nonnull tuple, int idx) {
     /// Return a borrowed reference
     void *v = PyTuple_GetItem(tuple, idx);
+    swiftvim_incref(v);
+    return v;
+}
+
+int swiftvim_tuple_size(void *_Nonnull tuple) {
+    PyGILState_STATE gstate = PyGILState_Ensure();
+    /// Return a borrowed reference
+    int v = (int)PyTuple_Size(tuple);
+    PyGILState_Release(gstate);
     return v;
 }
 

@@ -1,6 +1,3 @@
-import Foundation
-import Vim
-
 /// Convert to a vimscript string
 public protocol VimScriptConvertible {
     func toVimScript() -> String
@@ -20,7 +17,9 @@ extension String: VimScriptConvertible {
 
 extension Vim {
     public static func escapeForVim(_ value: String) -> String {
-        return value.replacingOccurrences(of: "'", with: "''")
+        // FIXME write this without Foundation
+        // return value.replacingOccurrences(of: "'", with: "''")
+        return value
     }
 
     /// Mark - Eval Helpers
@@ -60,8 +59,7 @@ extension Vim {
     // FIXME: Use the LibC realpath or something
     // This doesn't handle cases like /tmp/
     public static func realpath(_ path: String) -> String {
-        return URL(fileURLWithPath: path)
-            .standardizedFileURL.resolvingSymlinksInPath().path
+        return path
     }
 
     // MARK - Buffers

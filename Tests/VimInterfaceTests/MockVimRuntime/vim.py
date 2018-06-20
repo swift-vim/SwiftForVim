@@ -1,7 +1,12 @@
 import types
 import sys
+import os
 
-
+# Setup the build dir like the vim plugin does.
+src_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)),
+    "../../../")
+sys.path.insert(0, os.path.join(src_dir, '.build'))
+import Example
 
 class MockBuffer():
     def __init__(self):
