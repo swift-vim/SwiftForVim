@@ -1,5 +1,6 @@
 // VimPlugin Plugin initialization
 import ExampleVim
+import ExampleVimAsync
 
 /// plugin_load
 /// Core bootstrap for the plugin.
@@ -30,7 +31,7 @@ func plugin_load(context: UnsafePointer<Int8>) -> Int {
 func plugin_runloop_callback() {
     // Make sure to add VimAsync to the Makefile
     // and remove the comment.
-    // VimTaskRunLoopCallback()
+    VimTaskRunLoopCallback()
 }
 
 /// plugin_runloop_invoke

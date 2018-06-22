@@ -12,7 +12,7 @@ debug: CONFIG=debug
 debug: plugin_so
 
 .PHONY: release
-release: CONFIG=debug
+release: CONFIG=release
 release: vim_lib plugin_so
 
 BASE_OPTS=-Xcc -I$(PYTHON_INCLUDE) \
@@ -21,8 +21,6 @@ BASE_OPTS=-Xcc -I$(PYTHON_INCLUDE) \
 	-Xcc -fvisibility=hidden \
 	-Xlinker -undefined -Xlinker dynamic_lookup \
 	-Xlinker -all_load
-
-
 
 # Build namespaced versions of Vim and VimAsync libs.
 # The modules have a prefix of the plugin name, to avoid conflicts
@@ -41,8 +39,8 @@ renamed_vim_lib: vim_lib
 		$(BUILD_DIR)/$(PLUGIN_NAME)Vim.swiftmodule
 	@ditto $(BUILD_DIR)/Vim.swiftdoc \
 		$(BUILD_DIR)/$(PLUGIN_NAME)Vim.swiftdoc
-	@ditto $(BUILD_DIR)/libVim.a \
-		$(BUILD_DIR)/lib$(PLUGIN_NAME)Vim.a
+	@ditto $(BUILD_DIR)/libVim.dylib \
+		$(BUILD_DIR)/lib$(PLUGIN_NAME)Vim.dylib
 
 .PHONY: vim_async_lib, renamed_vim_lib_async
 vim_async_lib: SWIFT_OPTS=--product VimAsync  \
@@ -54,16 +52,16 @@ renamed_vim_async_lib: vim_async_lib
 		$(BUILD_DIR)/$(PLUGIN_NAME)VimAsync.swiftmodule
 	ditto $(BUILD_DIR)/VimAsync.swiftdoc \
 		$(BUILD_DIR)/$(PLUGIN_NAME)VimAsync.swiftdoc
-	@ditto $(BUILD_DIR)/libVimAsync.a \
-		$(BUILD_DIR)/lib$(PLUGIN_NAME)VimAsync.a
+	@ditto $(BUILD_DIR)/libVimAsync.dylib \
+		$(BUILD_DIR)/lib$(PLUGIN_NAME)VimAsync.dylib
 
 # Main plugin lib
 .PHONY: plugin_lib
 plugin_lib: SWIFT_OPTS=--product $(PLUGIN_NAME) \
 		$(BASE_OPTS) \
-	  	-Xlinker $(BUILD_DIR)/libVim.a
-plugin_lib: renamed_vim_lib 
-# To useadd VimAsync, add it following `renamed_vim_lib`
+		-Xlinker $(BUILD_DIR)/lib$(PLUGIN_NAME)VimAsync.dylib \
+	  	-Xlinker $(BUILD_DIR)/lib$(PLUGIN_NAME)Vim.dylib
+plugin_lib: renamed_vim_lib renamed_vim_async_lib
 
 # Build the .so, which Vim dynamically links.
 .PHONY: plugin_so

@@ -12,7 +12,7 @@ let package = Package(
             targets: ["__VIM_PLUGIN_NAME__"]),
     ],
     dependencies: [
-        .package(url: "https://github.com/swift-vim/SwiftForVim.git",
+        .package(url: "__GIT_REPO__",
              .revision("__GIT_REVISION__"))
     ],
     targets: [
@@ -32,7 +32,7 @@ let package = Package(
             dependencies: ["__VIM_PLUGIN_NAME__"]),
         // We cant depend on "Vim" due to namespacing issues
         // and SPM. This makes "Vim" available as a target.
-        .testTarget(name: "StubSPMVimImport",
-            dependencies: ["Vim"])
+        .target(name: "StubVimImport",
+            dependencies: ["Vim", "VimAsync"])
     ]
 )

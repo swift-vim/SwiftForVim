@@ -28,11 +28,24 @@ sed "s,__VIM_PLUGIN_NAME__,$PLUGIN,g" $SCRIPTPATH/PluginMain.tpl.swift \
 
 sed "s,__VIM_PLUGIN_NAME__,$PLUGIN,g" $SCRIPTPATH/Package.tpl.swift \
     > Package.swift
-sed -i "" "s,__GIT_REVISION__,$REV,g"  Package.swift
+
+# For testing, we'll set this to PWD
+if [[ ! $GIT_REPO ]]; then
+    GIT_REPO="https://github.com/swift-vim/SwiftForVim.git"
+fi
+
+sed -i "" "s,__GIT_REPO__,$GIT_REPO,g" \
+    Package.swift
+sed -i "" "s,__GIT_REVISION__,$REV,g" \
+    Package.swift
 
 mkdir -p VimUtils
 ditto $SCRIPTPATH/../VimUtils/make_lib.sh VimUtils/
 
 sed "s,__VIM_PLUGIN_NAME__,$PLUGIN,g" $SCRIPTPATH/Makefile.tpl \
     > Makefile
+
+mkdir -p Sources/StubVimImport
+touch Sources/StubVimImport/Dummy.swift
+
 

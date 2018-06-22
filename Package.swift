@@ -8,22 +8,22 @@ let package = Package(
     products: [
         .library(
             name: "VimInterface",
-            type: .static,
+            type: .dynamic,
             targets: ["VimInterface"]),
 
         .library(
             name: "Vim",
-            type: .static,
+            type: .dynamic,
             targets: ["Vim"]),
 
         .library(
             name: "VimPluginBootstrap",
-            type: .static,
+            type: .dynamic,
             targets: ["VimPluginBootstrap"]),
 
         .library(
             name: "VimAsync",
-            type: .static,
+            type: .dynamic,
             targets: ["VimAsync"]),
 
         .library(
@@ -54,7 +54,9 @@ let package = Package(
         .testTarget(
             name: "VimTests",
             dependencies: []),
-
+        .testTarget(
+            name: "VimAsyncTests",
+            dependencies: []),
         // Example:
         .target(name: "Example",
             dependencies: []),

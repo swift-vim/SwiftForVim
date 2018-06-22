@@ -73,6 +73,10 @@ let s:SwiftVimRunLoopTimer = timer_start(100, function('s:SwiftVimRunLoopTimer')
 
 " END_SWIFTVIM
 
+
+" Example of calling swift
+call s:SwiftVimEval("Swiftvimexample.invoke('helloSwift')")
+
 " This is basic vim plugin boilerplate
 let &cpo = s:save_cpo
 unlet s:save_cpo

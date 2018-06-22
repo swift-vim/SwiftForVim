@@ -17,7 +17,7 @@ debug: CONFIG=debug
 debug: plugin_so
 
 .PHONY: release
-release: CONFIG=debug
+release: CONFIG=release
 release: vim_lib plugin_so
 
 BASE_OPTS=-Xcc -I$(PYTHON_INCLUDE) \
@@ -46,10 +46,10 @@ renamed_vim_lib: vim_lib
 		$(BUILD_DIR)/$(PLUGIN_NAME)Vim.swiftmodule
 	@ditto $(BUILD_DIR)/Vim.swiftdoc \
 		$(BUILD_DIR)/$(PLUGIN_NAME)Vim.swiftdoc
-	@ditto $(BUILD_DIR)/libVim.a \
-		$(BUILD_DIR)/lib$(PLUGIN_NAME)Vim.a
+	@ditto $(BUILD_DIR)/libVim.dylib \
+		$(BUILD_DIR)/lib$(PLUGIN_NAME)Vim.dylib
 
-.PHONY: vim_async_lib, renamed_vim_lib_async
+.PHONY: vim_async_lib, renamed_vim_async_lib
 vim_async_lib: SWIFT_OPTS=--product VimAsync  \
 	-Xswiftc -module-name=$(PLUGIN_NAME)VimAsync \
 	-Xswiftc -module-link-name=$(PLUGIN_NAME)VimAsync \
@@ -59,15 +59,14 @@ renamed_vim_async_lib: vim_async_lib
 		$(BUILD_DIR)/$(PLUGIN_NAME)VimAsync.swiftmodule
 	@ditto $(BUILD_DIR)/VimAsync.swiftdoc \
 		$(BUILD_DIR)/$(PLUGIN_NAME)VimAsync.swiftdoc
-	@ditto $(BUILD_DIR)/libVimAsync.a \
-		$(BUILD_DIR)/lib$(PLUGIN_NAME)libVimAsync.a
+	@ditto $(BUILD_DIR)/libVimAsync.dylib \
+		$(BUILD_DIR)/lib$(PLUGIN_NAME)VimAsync.dylib
 
 # Main plugin lib
 .PHONY: plugin_lib
 plugin_lib: SWIFT_OPTS=--product $(PLUGIN_NAME) \
 		$(BASE_OPTS) 
-plugin_lib: renamed_vim_lib 
-# To useadd VimAsync, add it following `renamed_vim_lib`
+plugin_lib: renamed_vim_lib renamed_vim_async_lib
 
 # Build the .so, which Vim dynamically links.
 .PHONY: plugin_so
@@ -75,6 +74,8 @@ plugin_so: plugin_lib
 	@clang -g \
 		-Xlinker $(PYTHON_LINKED_LIB) \
 		-Xlinker $(BUILD_DIR)/lib$(PLUGIN_NAME).dylib \
+		-Xlinker $(BUILD_DIR)/lib$(PLUGIN_NAME)VimAsync.dylib \
+		-Xlinker $(BUILD_DIR)/lib$(PLUGIN_NAME)Vim.dylib \
 		-shared -o .build/$(PLUGIN_NAME).so
 
 # Build for the python dylib vim links
@@ -91,7 +92,6 @@ vim_lib vim_async_lib plugin_lib test_b: py_vars
 	@swift build -c $(CONFIG) \
 	   	$(BASE_OPTS) $(SWIFT_OPTS) $(EXTRA_OPTS) \
 	  	-Xswiftc -target -Xswiftc $(TRIPPLE) \
-	  	-Xlinker $(BUILD_DIR)/libVim.a \
 	   	| tee $(LAST_LOG)
 
 # Mark - Internal Utils:
@@ -108,6 +108,8 @@ test: debug
 	@swift build --product VimPackageTests \
 	   	$(BASE_OPTS) $(SWIFT_OPTS) $(EXTRA_OPTS) \
 		-Xlinker $(BUILD_DIR)/lib$(PLUGIN_NAME).dylib \
+		-Xlinker $(BUILD_DIR)/lib$(PLUGIN_NAME)VimAsync.dylib \
+		-Xlinker $(BUILD_DIR)/lib$(PLUGIN_NAME)Vim.dylib \
 	  	-Xswiftc -target -Xswiftc $(TRIPPLE)
 	@swift test --skip-build | tee $(LAST_LOG)
 
@@ -115,9 +117,10 @@ test: debug
 .PHONY: test_generate
 test_generate:
 	# We use the HEAD ref in the test
-	git diff --quiet || (echo 'Dirty tree' && exit 1)
+	#git diff --quiet || (echo 'Dirty tree' && exit 1)
 	rm -rf ~/Desktop/Swiftvimexample || true
-	plugin_path=~/Desktop/Swiftvimexample make generate
+	GIT_REPO=$(PWD)/.git  \
+		plugin_path=~/Desktop/Swiftvimexample make generate
 	cd ~/Desktop/Swiftvimexample && make
 
 clean:
