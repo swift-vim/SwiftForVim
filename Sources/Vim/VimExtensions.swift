@@ -1,3 +1,11 @@
+#if os(Linux)
+    import Glibc
+    let sysRealpath = Glibc.realpath
+#else
+    import Darwin.C
+    let sysRealpath = Darwin.realpath
+#endif
+
 /// Convert to a vimscript string
 public protocol VimScriptConvertible {
     func toVimScript() -> String
@@ -17,9 +25,10 @@ extension String: VimScriptConvertible {
 
 extension Vim {
     public static func escapeForVim(_ value: String) -> String {
-        // FIXME write this without Foundation
-        // return value.replacingOccurrences(of: "'", with: "''")
-        return value
+        return value.reduce(into: "", { acc, x  in
+            if x == "'" { acc += "''" }
+            else { acc += String(x) }
+        })
     }
 
     /// Mark - Eval Helpers
@@ -56,16 +65,17 @@ extension Vim {
         return current.window.cursor
     } 
 
-    // FIXME: Use the LibC realpath or something
-    // This doesn't handle cases like /tmp/
-    public static func realpath(_ path: String) -> String {
-        return path
+    public static func realpath(_ path: String) -> String? {
+        guard let p = sysRealpath(path, nil) else { return nil }
+        defer { free(p) }
+        return String(validatingUTF8: p)
     }
 
     // MARK - Buffers
 
     public static func getBufferNumber(for filename: String, openFileIfNeeded: Bool=false) -> Int {
-        let path = escapeForVim(realpath(filename))
+        guard let rpath = realpath(filename) else { return -1 }
+        let path = escapeForVim(rpath)
         let create = openFileIfNeeded == true ? "1" : "0"
         return get("bufnr('\(path)', \(create))")
     }
