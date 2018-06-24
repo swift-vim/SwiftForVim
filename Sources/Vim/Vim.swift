@@ -9,7 +9,8 @@ public struct Vim {
         return Current()
     }
 
-    /// Run a vim command
+    /// Run a Vim command.
+    /// :help command
     @discardableResult public static func command(_ cmd: String) throws -> VimValue  {
         var value: VimValue?
         cmd.withCString { cStr in
@@ -25,6 +26,7 @@ public struct Vim {
     }
 
     /// Evaluate an expression
+    /// :help eval
     @discardableResult public static func eval(_ cmd: String) throws -> VimValue {
         var value: VimValue?
         cmd.withCString { cStr in

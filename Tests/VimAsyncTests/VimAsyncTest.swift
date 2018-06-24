@@ -26,7 +26,7 @@ class VimAsyncTests: XCTestCase {
           fatalError("Fail.")
         }
         XCTAssertNotNil(result)
-        XCTAssertNil(result.asString())
+        XCTAssertNil(String(result))
         swiftvim_finalize()
     }
 }

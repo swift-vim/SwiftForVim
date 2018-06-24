@@ -49,15 +49,15 @@ extension Vim {
     }
 
     public static func get(_ variable: String) -> Bool {
-        return (try? eval(variable))?.asBool() ?? false
+        return Bool(try? eval(variable)) ?? false
     }
 
     public static func get(_ variable: String) -> Int {
-        return (try? eval(variable))?.asInt() ?? 0
+        return Int(try? eval(variable)) ?? 0
     }
 
     public static func get(_ variable: String) -> String {
-        return (try? eval(variable))?.asString() ?? ""
+        return String(try? eval(variable)) ?? ""
     }
 
     /// Returns the 0-based current line and 0-based current column

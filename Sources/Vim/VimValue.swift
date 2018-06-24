@@ -1,10 +1,19 @@
 import VimInterface
 
+// Converting values from Vim.
+// VimValue is a `View` into the state of Vim.
+// Design:
+// - Be fast
+// - Be as idomatic as possible
+//
+// In the standard library, types do not dynamically cast to Any.
+// 
+
 extension Int {
     public init?(_ value: VimValue) {
         // Generally, eval results are returned as strings
         // Perhaps there is a better way to express this.
-        if let strValue = value.asString(), 
+        if let strValue = String(value),
             let intValue = Int(strValue) {
             self.init(intValue)
         } else {
@@ -82,34 +91,12 @@ public final class VimValue {
     }
 }
 
-/// Casting extensions
-extension VimValue {
-    public func asString() -> String? {
-        return String(self)
-    }
-
-    public func asInt() -> Int? {
-        return Int(self)
-    }
-
-    public func asBool() -> Bool? {
-        return Bool(self)
-    }
-
-    public func asList() -> VimList? {
-        return VimList(self)
-    }
-
-    public func asDictionary() -> VimDictionary? {
-        return VimDictionary(self)
-    }
-}
 
 // A Dictionary
 public final class VimDictionary {
     private let value: VimValue
 
-    init?(_ value: VimValue) {
+    public init?(_ value: VimValue) {
         self.value = value
     }
 
@@ -118,14 +105,14 @@ public final class VimDictionary {
     }
 
     public var keys: VimList {
-        guard let list = VimValue(reference: swiftvim_dict_keys(value.reference)).asList() else {
+        guard let list = VimList(VimValue(reference: swiftvim_dict_keys(value.reference))) else {
             fatalError("Can't get keys")
          }
          return list
     }
 
     public var values: VimList {
-        guard let list = VimValue(reference: swiftvim_dict_values(value.reference)).asList() else {
+        guard let list = VimList(VimValue(reference: swiftvim_dict_values(value.reference))) else {
             fatalError("Can't get values")
         }
         return list

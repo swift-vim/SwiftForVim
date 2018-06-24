@@ -110,8 +110,8 @@ test: debug
 		-Xlinker $(BUILD_DIR)/lib$(PLUGIN_NAME).dylib \
 		-Xlinker $(BUILD_DIR)/lib$(PLUGIN_NAME)VimAsync.dylib \
 		-Xlinker $(BUILD_DIR)/lib$(PLUGIN_NAME)Vim.dylib \
-	  	-Xswiftc -target -Xswiftc $(TRIPPLE)
-	@swift test --skip-build | tee $(LAST_LOG)
+	  	-Xswiftc -target -Xswiftc $(TRIPPLE) | tee $(LAST_LOG)
+	@swift test --skip-build 2>&1 | tee -a $(LAST_LOG)
 
 
 .PHONY: test_generate

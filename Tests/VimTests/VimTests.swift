@@ -34,14 +34,14 @@ class VimValueTests: XCTestCase {
     func testEvalString() {
         swiftvim_initialize()
         let result = try! Vim.eval("VALUE")
-        XCTAssertEqual(result.asString(), "VALUE")
+        XCTAssertEqual(String(result), "VALUE")
         swiftvim_finalize()
     }
 
     func testCommandNone() {
         swiftvim_initialize()
         let result = try! Vim.command("VALUE")
-        XCTAssertNil(result.asString())
+        XCTAssertNil(String(result))
         swiftvim_finalize()
     }
 
@@ -49,7 +49,7 @@ class VimValueTests: XCTestCase {
         swiftvim_initialize()
         mutateRuntime("eval", lambda: "lambda value : int(value)")
         let result = try! Vim.eval("2")
-        XCTAssertEqual(result.asInt(), 2)
+        XCTAssertEqual(Int(result), 2)
         swiftvim_finalize()
     }
 
@@ -57,12 +57,12 @@ class VimValueTests: XCTestCase {
         swiftvim_initialize()
         mutateRuntime("eval", lambda: "lambda value : [1, 2]")
         let result = try! Vim.eval("")
-        let list = result.asList()!
+        let list = VimList(result)!
         XCTAssertEqual(list.count, 2)
-        XCTAssertEqual(list[0].asInt(), 1)
-        XCTAssertEqual(list[1].asInt(), 2)
+        XCTAssertEqual(Int(list[0]), 1)
+        XCTAssertEqual(Int(list[1]), 2)
         list[1] = list[0]
-        XCTAssertEqual(list[1].asInt(), 1)
+        XCTAssertEqual(Int(list[1]), 1)
         swiftvim_finalize()
     }
 
@@ -70,9 +70,9 @@ class VimValueTests: XCTestCase {
         swiftvim_initialize()
         mutateRuntime("eval", lambda: "lambda value : [1, 2]")
         let result = try! Vim.eval("")
-        let list = result.asList()!
+        let list = VimList(result)!
         /// Smoke test we can do collectiony things.
-        let incremented = list.map { $0.asInt()! + 1 }
+        let incremented = list.map { Int($0)! + 1 }
         XCTAssertEqual(incremented[1], 3)
         swiftvim_finalize()
     }
@@ -81,11 +81,11 @@ class VimValueTests: XCTestCase {
         swiftvim_initialize()
         mutateRuntime("eval", lambda: "lambda value : dict(a=42, b='a')")
         let result = try! Vim.eval("")
-        let dict = result.asDictionary()!
+        let dict = VimDictionary(result)!
         let aVal = dict["a"]!
-        XCTAssertEqual(aVal.asInt()!, 42)
+        XCTAssertEqual(Int(aVal)!, 42)
         let nonVal = dict["s"]
-        XCTAssertNil(nonVal?.asInt())
+        XCTAssertNil(Int(nonVal))
 
         swiftvim_finalize()
     }
@@ -94,7 +94,7 @@ class VimValueTests: XCTestCase {
         swiftvim_initialize()
         mutateRuntime("eval", lambda: "lambda value : dict(a=42, b='a')")
         let result = try! Vim.eval("")
-        let dict = result.asDictionary()!
+        let dict = VimDictionary(result)!
         XCTAssertEqual(dict.keys.count, 2)
         XCTAssertEqual(dict.values.count, 2)
         swiftvim_finalize()
@@ -131,7 +131,7 @@ class VimValueTests: XCTestCase {
         let cb = "Example.invoke('\(address)', 'arga')"
         print("Callback:", cb)
         mutateRuntime("eval", lambda: "lambda value : \(cb)")
-        try? Vim.eval("")
+        _ = try? Vim.eval("")
         XCTAssertTrue(called)
         swiftvim_finalize()
     }
