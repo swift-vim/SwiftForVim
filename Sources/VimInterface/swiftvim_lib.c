@@ -4,7 +4,7 @@
 #include <stdio.h>
 
 // Do not export any symbols - we don't want collisions
-#define VIM_INTEN __attribute__ ((visibility("hidden")))
+#define VIM_INTERN __attribute__ ((visibility("hidden")))
 
 static FILE *_plugin_error_f = NULL;
 
@@ -44,7 +44,7 @@ static PyObject *SPyString_FromString(const char *input) {
 void *swiftvim_call_impl(void *func, void *arg1, void *arg2);
 
 // module=vim, method=command|exec, str = value
-VIM_INTEN void *swiftvim_call(const char *module, const char *method, const char *textArg) {
+VIM_INTERN void *swiftvim_call(const char *module, const char *method, const char *textArg) {
     PyObject *pName = SPyString_FromString(module);
     PyObject *pModule = PyImport_Import(pName);
     Py_DECREF(pName);
@@ -66,7 +66,7 @@ VIM_INTEN void *swiftvim_call(const char *module, const char *method, const char
     return v;
 }
 
-VIM_INTEN void *swiftvim_get_module(const char *module) {
+VIM_INTERN void *swiftvim_get_module(const char *module) {
     PyObject *pName = SPyString_FromString(module);
     PyObject *pModule = PyImport_Import(pName);
     Py_DECREF(pName);
@@ -78,7 +78,7 @@ VIM_INTEN void *swiftvim_get_module(const char *module) {
     return pModule;
 }
 
-VIM_INTEN void *swiftvim_get_attr(void *target, const char *method) {
+VIM_INTERN void *swiftvim_get_attr(void *target, const char *method) {
     void *v = PyObject_GetAttrString(target, method);
     return v;
 }
@@ -98,7 +98,7 @@ static void print_basic_error_desc() {
     fprintf(plugin_error_f(), "\n=== endCallStack == \n");
 }
 
-VIM_INTEN void *swiftvim_call_impl(void *pFunc, void *arg1, void *arg2) {
+VIM_INTERN void *swiftvim_call_impl(void *pFunc, void *arg1, void *arg2) {
     void *outValue = NULL;
     // pFunc is a new reference 
     if (pFunc && PyCallable_Check(pFunc)) {
@@ -142,16 +142,16 @@ VIM_INTEN void *swiftvim_call_impl(void *pFunc, void *arg1, void *arg2) {
     return outValue;
 }
 
-VIM_INTEN void *swiftvim_command(const char *command) {
+VIM_INTERN void *swiftvim_command(const char *command) {
     return swiftvim_call("vim", "command", command);
 }
 
-VIM_INTEN void *swiftvim_eval(const char *eval) {
+VIM_INTERN void *swiftvim_eval(const char *eval) {
     return swiftvim_call("vim", "eval", eval);
 }
 
 // TODO: Do these need GIL locks?
-VIM_INTEN void *swiftvim_decref(void *value) {
+VIM_INTERN void *swiftvim_decref(void *value) {
     if (value == NULL) {
         return NULL;
     }
@@ -160,7 +160,7 @@ VIM_INTEN void *swiftvim_decref(void *value) {
     return NULL;
 }
 
-VIM_INTEN void *swiftvim_incref(void *value) {
+VIM_INTERN void *swiftvim_incref(void *value) {
     if (value == NULL) {
         return NULL;
     }
@@ -169,7 +169,7 @@ VIM_INTEN void *swiftvim_incref(void *value) {
     return NULL;
 }
 
-VIM_INTEN const char *swiftvim_asstring(void *value) {
+VIM_INTERN const char *swiftvim_asstring(void *value) {
     if (value == NULL) {
         return "";
     }
@@ -177,64 +177,64 @@ VIM_INTEN const char *swiftvim_asstring(void *value) {
     return v;
 }
 
-VIM_INTEN long swiftvim_asnum(void *value) {
+VIM_INTERN long swiftvim_asnum(void *value) {
     long v = PyLong_AsLong(value);
     return v;
 }
 
-VIM_INTEN int swiftvim_list_size(void *list) {
+VIM_INTERN int swiftvim_list_size(void *list) {
     int v = PySequence_Size(list);
     return v;
 }
 
-VIM_INTEN void swiftvim_list_set(void *list, size_t i, void *value) {
+VIM_INTERN void swiftvim_list_set(void *list, size_t i, void *value) {
     PySequence_SetItem(list, i, value);
 }
 
-VIM_INTEN void *swiftvim_list_get(void *list, size_t i) {
+VIM_INTERN void *swiftvim_list_get(void *list, size_t i) {
     /// Return a borrowed reference
     void *v = PySequence_GetItem(list, i);
     return v;
 }
 
-VIM_INTEN void swiftvim_list_append(void *list, void *value) {
+VIM_INTERN void swiftvim_list_append(void *list, void *value) {
     PyList_Append(list, value);
 }
 
 // MARK - Dict
 
-VIM_INTEN int swiftvim_dict_size(void *dict) {
+VIM_INTERN int swiftvim_dict_size(void *dict) {
     int v = PyDict_Size(dict);
     return v;
 }
 
-VIM_INTEN void *swiftvim_dict_keys(void *dict) {
+VIM_INTERN void *swiftvim_dict_keys(void *dict) {
     // Return value: New reference
     void *v = PyDict_Keys(dict);
     return v;
 }
 
-VIM_INTEN void *swiftvim_dict_values(void *dict) {
+VIM_INTERN void *swiftvim_dict_values(void *dict) {
     // Return value: New reference
     void *v = PyDict_Items(dict);
     return v;
 }
 
-VIM_INTEN void swiftvim_dict_set(void *dict, void *key, void *value) {
+VIM_INTERN void swiftvim_dict_set(void *dict, void *key, void *value) {
     PyDict_SetItem(dict, key, value);
 }
 
-VIM_INTEN void *swiftvim_dict_get(void *dict, void *key) {
+VIM_INTERN void *swiftvim_dict_get(void *dict, void *key) {
     /// Return a borrowed reference
     void *v = PyDict_GetItem(dict, key);
     return v;
 }
 
-VIM_INTEN void swiftvim_dict_setstr(void *dict, const char *key, void *value) {
+VIM_INTERN void swiftvim_dict_setstr(void *dict, const char *key, void *value) {
     PyDict_SetItemString(dict, key, value);
 }
 
-VIM_INTEN void *swiftvim_dict_getstr(void *dict, const char *key) {
+VIM_INTERN void *swiftvim_dict_getstr(void *dict, const char *key) {
     /// Return a borrowed reference
     void *v = PyDict_GetItemString(dict, key);
     return v;
@@ -242,7 +242,7 @@ VIM_INTEN void *swiftvim_dict_getstr(void *dict, const char *key) {
 
 // MARK - Tuples
 
-VIM_INTEN void *_Nonnull swiftvim_tuple_get(void *_Nonnull tuple, int idx) {
+VIM_INTERN void *_Nonnull swiftvim_tuple_get(void *_Nonnull tuple, int idx) {
     /// Return a borrowed reference
     void *v = PyTuple_GetItem(tuple, idx);
     swiftvim_incref(v);
@@ -257,7 +257,7 @@ int swiftvim_tuple_size(void *_Nonnull tuple) {
     return v;
 }
 
-VIM_INTEN void swiftvim_initialize() {
+VIM_INTERN void swiftvim_initialize() {
     Py_Initialize();
     if(!PyEval_ThreadsInitialized()) {
         PyEval_InitThreads();
@@ -283,11 +283,11 @@ VIM_INTEN void swiftvim_initialize() {
 #endif
 }
 
-VIM_INTEN void swiftvim_finalize() {
+VIM_INTERN void swiftvim_finalize() {
     Py_Finalize();
 }
 
-VIM_INTEN void *_Nullable swiftvim_get_error() {
+VIM_INTERN void *_Nullable swiftvim_get_error() {
     if (PyErr_Occurred()) {
         PyObject *type, *value, *traceback;
         PyErr_Fetch(&type, &value, &traceback);

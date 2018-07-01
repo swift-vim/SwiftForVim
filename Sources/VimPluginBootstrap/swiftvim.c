@@ -58,7 +58,6 @@ static struct PyModuleDef swiftvimmodule = {
     swiftvimMethods
 };
 
-VIM_EXTERN PyMODINIT_FUNC PLUGIN_FUNC(PyInit_, VIM_PLUGIN_NAME)(void);
 VIM_EXTERN PyMODINIT_FUNC PLUGIN_FUNC(PyInit_, VIM_PLUGIN_NAME)(void) {
     PyObject *m;
 
@@ -86,12 +85,6 @@ VIM_EXTERN PyMODINIT_FUNC PLUGIN_FUNC(init, VIM_PLUGIN_NAME)(void) {
     PyModule_AddObject(m, "error", swiftvimError);
 }
 #endif
-
-__attribute__((constructor)) void _T(void) {
-    if (PLUGIN_FUNC(init, VIM_PLUGIN_NAME) == NULL) {
-        fprintf(stderr, "error: can't find plugin..");
-    }
-}
 
 // Mark - Method Implementations
 
