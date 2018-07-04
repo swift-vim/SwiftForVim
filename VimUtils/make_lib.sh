@@ -8,7 +8,7 @@
 # - custom built vims against OSX python
 
 function realpath() {
-    echo $(python -c "import os; print os.path.realpath('$1')")
+    echo $(python -c "import os; print(os.path.realpath('$1'))")
 }
 
 function find_py_from_vim() {
