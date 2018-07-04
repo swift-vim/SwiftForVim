@@ -118,9 +118,12 @@ class VimValueTests: XCTestCase {
 
     func testCallback() {
         var called = false
-        func callback(args: Any) -> Any? {
+        var calledArgs: [VimValue]?
+        let callback: (([VimValue]) -> VimScriptConvertible?) = { 
+            args in
             called = true
-            print("DidCallback")
+            calledArgs = args
+            print("test-info: DidCallback", args)
             return nil
         }
 
@@ -129,10 +132,13 @@ class VimValueTests: XCTestCase {
         let address = unsafeBitCast(erasedFunc, to: Int.self)
         VimPlugin.setCallable(String(address), callable: callback)
         let cb = "Example.invoke('\(address)', 'arga')"
-        print("Callback:", cb)
+        print("test-info: Callback:", cb)
         mutateRuntime("eval", lambda: "lambda value : \(cb)")
         _ = try? Vim.eval("")
+        print("test-info: Callback Args:", calledArgs ?? "")
         XCTAssertTrue(called)
+        XCTAssertEqual(calledArgs?.count, 1)
+        XCTAssertEqual(String(calledArgs?.first), "arga") 
         swiftvim_finalize()
     }
 }
