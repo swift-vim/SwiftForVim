@@ -72,11 +72,15 @@ public final class VimValue {
     }
 
     /// Borrowed reference
-    init(borrowedReference: UnsafeVimValue) {
+    init(borrowedReference: UnsafeVimValue, own: Bool = false) {
         self.reference = borrowedReference
-        self.doDeInit = false
+        self.doDeInit = own
+        if own {
+            swiftvim_incref(borrowedReference)
+        }
     }
 
+    /// New reference
     public init(reference: UnsafeVimValue) {
         // FIXME: Audit spmvim_lib.c for cases of this
         self.reference = reference
